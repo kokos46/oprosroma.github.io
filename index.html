@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Викторина</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f3f4f6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        img {
+            width: 100%;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: 0.3s;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .option-btn {
+            background: #e5e7eb;
+            width: 45%;
+        }
+        .option-btn.correct {
+            background: #4ade80;
+            color: white;
+        }
+        .option-btn.wrong {
+            background: #f87171;
+            color: white;
+        }
+        .next-btn {
+            background: #3b82f6;
+            color: white;
+            margin-top: 10px;
+        }
+        .start-btn {
+            background: #10b981;
+            color: white;
+            margin-top: 10px;
+        }
+        .counter {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+        .question-select {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        .question-select label {
+            display: block;
+            margin: 4px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="card" id="quiz-container">
+    <h1>Выберите вопросы для викторины</h1>
+    <div id="question-selection" class="question-select"></div>
+    <button id="start-btn" class="start-btn">Начать викторину</button>
+</div>
+
+<script>
+    const questions = [
+        {id:1,image:"selectsort.png",text:"Что это за метод?",options:["Select Sort","Insert Sort","Shell Sort","Bubble Sort"],correct:"Select Sort"},
+        {id:2,image:"bubblesort.png",text:"Что это за метод?",options:["Select Sort","Insert Sort","Shell Sort","Bubble Sort"],correct:"Bubble Sort"},
+        {id:3,image:"shakersort.png",text:"Что это за метод?",options:["Select Sort","Quick Sort","Shaker Sort","Bubble Sort"],correct:"Shaker Sort"},
+        {id:4,image:"insertsort.png",text:"Что это за метод?",options:["Shell Sort","Heap Sort","Select Sort","Insert Sort"],correct:"Insert Sort"},
+        {id:5,image:"shellsort.png",text:"Что это за метод?",options:["Shell Sort","Двоичный поиск 1","Select Sort","Insert Sort"],correct:"Shell Sort"},
+        {id:6,image:"binarysearch1.png",text:"Что это за метод?",options:["Двоичный поиск 1","Двоичный поиск 2","Heap Sort","Digital Sort"],correct:"Двоичный поиск 1"},
+        {id:7,image:"binarysearch2.png",text:"Что это за метод?",options:["Hash вставка","Двоичный поиск 2","Heap Sort","Digital Sort"],correct:"Двоичный поиск 2"},
+        {id:8,image:"indexation.png",text:"Что это за метод?",options:["Heap Sort","Построение индексного массива","Select Sort","Digital Sort"],correct:"Построение индексного массива"},
+        {id:9,image:"buildheap.png",text:"Что это за метод?",options:["Построение пирамиды","Digital Sort","Quick Sort","Merge Sort"],correct:"Построение пирамиды"},
+        {id:10,image:"heapsort.png",text:"Что это за метод?",options:["Heap Sort","Quick Sort","Shaker Sort","Shell Sort"],correct:"Heap Sort"},
+        {id:11,image:"quicksort.png",text:"Что это за метод?",options:["Digital Sort","Quick Sort","Bubble Sort","Shell Sort"],correct:"Quick Sort"},
+        {id:12,image:"mergesort.png",text:"Что это за метод?",options:["Слияние серий","Heap Sort","Bubble Sort","Shell Sort"],correct:"Слияние серий"},
+        {id:13,image:"hashinsert.png",text:"Что это за метод?",options:["Вставка в хеш","Quick Sort","Select Sort","Сосал?"],correct:"Вставка в хеш"},
+        {id:14,image:"hashsearch.png",text:"Что это за метод?",options:["Вставка в хеш","Поиск в хеше","Merge Sort","липстик я наношу..."],correct:"Поиск в хеше"},
+        {id:14,image:"squareprobes.png",text:"Что это за метод?",options:["Квадратичные пробы","Поиск в хеше","Quick Sort","Digital Sort"],correct:"Квадратичные пробы"},
+    ];
+
+    const container = document.getElementById("quiz-container");
+    const selectionDiv = document.getElementById("question-selection");
+    const startBtn = document.getElementById("start-btn");
+
+    // Создание чекбоксов
+    questions.forEach(q => {
+        const label = document.createElement("label");
+        label.innerHTML = `<input type="checkbox" value="${q.id}"> ${q.correct}`;
+        selectionDiv.appendChild(label);
+    });
+
+    let selectedIds = [];
+    let currentIndex = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let currentQuestions = [];
+
+    startBtn.addEventListener("click", () => {
+        const checked = selectionDiv.querySelectorAll("input:checked");
+        if (checked.length === 0) {
+            alert("Выберите хотя бы один вопрос!");
+            return;
+        }
+
+        selectedIds = Array.from(checked).map(c => +c.value);
+        currentQuestions = questions.filter(q => selectedIds.includes(q.id));
+
+        // 🔀 Перемешиваем вопросы
+        for (let i = currentQuestions.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [currentQuestions[i], currentQuestions[j]] = [currentQuestions[j], currentQuestions[i]];
+        }
+
+        currentIndex = 0;
+        correctCount = 0;
+        wrongCount = 0;
+        showQuestion();
+    });
+
+
+    function showQuestion() {
+        const q = currentQuestions[currentIndex];
+        container.innerHTML = `
+        <img src="${q.image}" alt="question">
+        <h2>${q.text}</h2>
+        <div id="options" style="display:flex;flex-wrap:wrap;justify-content:space-around;"></div>
+        <div class="counter">Вопрос ${currentIndex+1} из ${currentQuestions.length}</div>
+        <div class="counter">✅ Правильных: ${correctCount} | ❌ Ошибок: ${wrongCount}</div>
+      `;
+
+        const optionsDiv = document.getElementById("options");
+        q.options.forEach(opt => {
+            const btn = document.createElement("button");
+            btn.className = "option-btn";
+            btn.textContent = opt;
+            btn.onclick = () => handleAnswer(btn, opt === q.correct);
+            optionsDiv.appendChild(btn);
+        });
+    }
+
+    function handleAnswer(button, isCorrect) {
+        const allButtons = document.querySelectorAll(".option-btn");
+        allButtons.forEach(b => b.disabled = true);
+        if (isCorrect) {
+            button.classList.add("correct");
+            correctCount++;
+        } else {
+            button.classList.add("wrong");
+            wrongCount++;
+        }
+
+        const nextBtn = document.createElement("button");
+        nextBtn.className = "next-btn";
+        nextBtn.textContent = currentIndex < currentQuestions.length - 1 ? "Следующий" : "Завершить";
+        nextBtn.onclick = () => {
+            if (currentIndex < currentQuestions.length - 1) {
+                currentIndex++;
+                showQuestion();
+            } else {
+                showResult();
+            }
+        };
+        container.appendChild(nextBtn);
+    }
+
+    function showResult() {
+        container.innerHTML = `
+        <h2>Викторина завершена!</h2>
+        <p>✅ Правильных: ${correctCount}</p>
+        <p>❌ Ошибок: ${wrongCount}</p>
+        <button class="start-btn" onclick="location.reload()">Начать заново</button>
+      `;
+    }
+</script>
+</body>
+</html>

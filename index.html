@@ -82,6 +82,7 @@
 <div class="card" id="quiz-container">
     <h1>Выберите вопросы для викторины</h1>
     <div id="question-selection" class="question-select"></div>
+    <button id="select-all-btn" class="start-btn" style="background:#6366f1;">Выбрать всё</button>
     <button id="start-btn" class="start-btn">Начать викторину</button>
 </div>
 
@@ -107,6 +108,7 @@
     const container = document.getElementById("quiz-container");
     const selectionDiv = document.getElementById("question-selection");
     const startBtn = document.getElementById("start-btn");
+    const selectAllBtn = document.getElementById("select-all-btn");
 
     // Создание чекбоксов
     questions.forEach(q => {
@@ -114,6 +116,15 @@
         label.innerHTML = `<input type="checkbox" value="${q.id}"> ${q.correct}`;
         selectionDiv.appendChild(label);
     });
+
+    // Кнопка "Выбрать всё / Снять выделение"
+    selectAllBtn.addEventListener("click", () => {
+        const checkboxes = selectionDiv.querySelectorAll("input[type='checkbox']");
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        checkboxes.forEach(cb => cb.checked = !allChecked);
+        selectAllBtn.textContent = allChecked ? "Выбрать всё" : "Снять всё";
+    });
+
 
     let selectedIds = [];
     let currentIndex = 0;
